@@ -1,66 +1,136 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 👤 User Service API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Base URL:** `http://localhost:8000`
 
-## About Laravel
+## Deskripsi Layanan
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+User Service adalah **gerbang utama** dan **fondasi keamanan** dari platform **House of Zama**. Layanan ini menangani:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+* 🔐 **Otentikasi**: Registrasi, login, dan logout pengguna.
+* 🛡️ **Otorisasi**: Mengelola peran pengguna (Admin dan User).
+* 🗃️ **Manajemen Data**: Menyediakan fitur CRUD untuk data master pengguna.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Dibangun menggunakan **Laravel 10** dan terkoneksi dengan **database MySQL**, layanan ini menjadi **source of truth** untuk seluruh informasi pengguna di sistem.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🛠️ Daftar Endpoint
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### `POST /api/register`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Deskripsi:**
+Mendaftarkan klien baru ke platform.
+📌 Endpoint ini bersifat **publik** dan **tidak memerlukan autentikasi**.
 
-## Laravel Sponsors
+**Contoh Request Body:**
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```json
+{
+  "name": "John Doe",
+  "email": "johndoe@example.com",
+  "password": "securePassword123"
+}
+```
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### `POST /api/login`
 
-## Contributing
+**Deskripsi:**
+Melakukan otentikasi pengguna berdasarkan kredensial.
+Jika berhasil, mengembalikan `access_token` (Bearer Token) untuk digunakan pada endpoint yang terproteksi.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Contoh Request Body:**
 
-## Code of Conduct
+```json
+{
+  "email": "johndoe@example.com",
+  "password": "securePassword123"
+}
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Response:**
 
-## Security Vulnerabilities
+```json
+{
+  "access_token": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOi...",
+  "token_type": "Bearer"
+}
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+### `GET /api/me`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Deskripsi:**
+Mengambil data lengkap dari pengguna yang sedang login.
+📌 **Wajib menyertakan Bearer Token** di header `Authorization`.
+
+---
+
+### `POST /api/logout`
+
+**Deskripsi:**
+Menghapus token otentikasi yang sedang digunakan.
+Secara efektif, ini akan **mengeluarkan pengguna dari sesi aktif**.
+
+📌 **Wajib Bearer Token.**
+
+---
+
+### `GET /api/users`
+
+**Deskripsi:**
+🔒 Hanya untuk **Admin**
+Mengambil seluruh data pengguna dengan **fitur paginasi**.
+
+📌 Terproteksi & hanya bisa diakses oleh pengguna dengan peran `admin`.
+
+---
+
+### `GET /api/users/{id}`
+
+**Deskripsi:**
+🔒 \[Admin] Mengambil **detail pengguna spesifik** berdasarkan ID-nya.
+
+---
+
+### `PUT /api/users/{id}`
+
+**Deskripsi:**
+🔒 \[Admin] Memperbarui data pengguna seperti nama, email, atau password.
+
+**Contoh Request Body:**
+
+```json
+{
+  "name": "Jane Doe",
+  "email": "janedoe@example.com"
+}
+```
+
+---
+
+### `DELETE /api/users/{id}`
+
+**Deskripsi:**
+🔒 \[Admin] Menghapus pengguna secara permanen dari sistem.
+
+---
+
+## 🔐 Autentikasi
+
+Gunakan format Bearer Token pada header untuk endpoint yang terproteksi:
+
+```
+Authorization: Bearer {access_token}
+```
+
+---
+
+## 📝 Catatan Tambahan
+
+* Semua endpoint menggunakan format JSON.
+* Autentikasi menggunakan token berbasis **JWT**.
+* Role pengguna (`admin` / `user`) menentukan hak akses terhadap endpoint tertentu.
+
